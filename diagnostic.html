@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airvane Diagnostic</title>
+    <title>Stop Restarting — The Diagnostic | Airvane Sys</title>
     <style>
         :root {
             --color-bg: #f9f7f4;
@@ -85,7 +85,11 @@
         }
 
         .option:hover { border-color: #999; }
-        .option.selected { border-color: var(--color-accent); background: #fafafa; }
+
+        .option.selected {
+            border-color: var(--color-accent);
+            background: #fafafa;
+        }
 
         .radio {
             width: 18px;
@@ -99,6 +103,7 @@
         }
 
         .selected .radio { border-color: var(--color-accent); }
+
         .selected .radio::after {
             content: '';
             width: 10px;
@@ -123,8 +128,16 @@
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
         #email-section { margin-top: 2rem; }
+
         .input-group { margin-bottom: 1.5rem; }
-        label { display: block; font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 0.5rem; }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+        }
+
         input[type="email"] {
             width: 100%;
             padding: 0.75rem;
@@ -140,194 +153,209 @@
             border-radius: 4px;
         }
 
-        .result-headline { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 1rem; }
-        .result-body { color: var(--color-text-muted); margin-bottom: 1.5rem; }
+        .result-headline {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
 
-        .loading { text-align: center; font-style: italic; color: var(--color-text-muted); }
+        .result-body {
+            color: var(--color-text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: var(--color-text-muted);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Airvane Diagnostic</h1>
-            <p class="subtitle">Five questions. Honest answers only.</p>
-        </header>
+<div class="container">
+    <header>
+        <h1>Airvane Diagnostic</h1>
+        <p class="subtitle">Five questions. Honest answers only.</p>
+    </header>
 
-        <div id="email-screen" class="screen">
+    <!-- EMAIL SCREEN (shown only when no ?email= param) -->
+    <div id="email-screen" class="screen">
+        <div id="email-section">
             <div class="input-group">
                 <label for="email">Enter your email to start</label>
                 <input type="email" id="email" placeholder="you@example.com">
             </div>
             <button class="btn-primary" onclick="startDiagnostic()">Begin</button>
         </div>
-
-        <div id="quiz-screen" class="screen">
-            <div class="progress" id="progress-text">1 / 5</div>
-            <div class="question-text" id="question-text"></div>
-            <div class="options" id="options-container"></div>
-            <button class="btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next</button>
-        </div>
-
-        <div id="loading-screen" class="screen loading">
-            <p>Analyzing the pattern...</p>
-        </div>
-
-        <div id="result-screen" class="screen">
-            <div class="result-card">
-                <h2 class="result-headline" id="result-headline"></h2>
-                <p class="result-body" id="result-body"></p>
-                <p style="font-size: 0.875rem; color: #999;">Check your email for the full segmentation breakdown.</p>
-            </div>
-        </div>
     </div>
 
-    <script>
-        const AGENT_URL = 'https://airvane-diagnostic-agent-production.up.railway.app/webhook';
-        
-        const questions = [
-            {
-                text: "When you sit down to write an email, what usually happens first?",
-                options: [
-                    "I research the topic or audience before writing anything.",
-                    "I hear a voice or tone in my head and start from there.",
-                    "I start writing but drift — the email becomes something else.",
-                    "I struggle to hold attention, including my own.",
-                    "I keep opening new tabs instead of writing."
-                ]
-            },
-            {
-                text: "How do you typically decide the 'voice' of a piece?",
-                options: [
-                    "I mirror the way the audience already speaks.",
-                    "I follow a set of internal guidelines I've developed.",
-                    "It's intuitive — I just wait for it to feel right.",
-                    "I usually don't decide; it just happens."
-                ]
-            },
-            {
-                text: "What's the most common reason you hit 'delete'?",
-                options: [
-                    "The logic is flawed or incomplete.",
-                    "The tone feels forced or inauthentic.",
-                    "It's too long or too complicated.",
-                    "I lost interest in the premise."
-                ]
-            },
-            {
-                text: "In your best work, what is the primary driver?",
-                options: [
-                    "Precision. Getting the facts exactly right.",
-                    "Resonance. Making the reader feel understood.",
-                    "Provocation. Making the reader stop and think.",
-                    "Speed. Getting the idea out before it vanishes."
-                ]
-            },
-            {
-                text: "What happens right after you hit 'send'?",
-                options: [
-                    "I immediately start checking for errors I missed.",
-                    "I wonder if it will actually land the way I intended.",
-                    "I feel relief and move on to the next thing.",
-                    "I forget about it almost instantly."
-                ]
-            }
-        ];
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="screen">
+        <div class="progress" id="progress-text">1 / 5</div>
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options-container"></div>
+        <button class="btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next</button>
+    </div>
 
-        let currentStep = 0;
-        let answers = [];
-        let userEmail = '';
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="screen">
+        <p class="loading">Analyzing the pattern...</p>
+    </div>
 
-        // Check for email param
-        const urlParams = new URLSearchParams(window.location.search);
-        const emailParam = urlParams.get('email');
+    <!-- RESULT SCREEN -->
+    <div id="result-screen" class="screen">
+        <div class="result-card">
+            <div class="result-headline" id="result-headline"></div>
+            <div class="result-body" id="result-body"></div>
+            <p style="font-size:0.875rem;color:#999;">Check your email for the full segmentation breakdown.</p>
+        </div>
+    </div>
+</div>
 
-        if (emailParam) {
-            userEmail = emailParam;
+<script>
+    const AGENT_URL = 'https://airvane-diagnostic-agent-production.up.railway.app/webhook';
+
+    const questions = [
+        {
+            text: "When you sit down to write an email, what usually happens first?",
+            options: [
+                "I research the topic or audience before writing anything.",
+                "I hear a voice or tone in my head and start from there.",
+                "I start writing but drift — the email becomes something else.",
+                "I struggle to hold attention, including my own.",
+                "I keep opening new tabs instead of writing."
+            ]
+        },
+        {
+            text: "Which sentence would you most likely write?",
+            options: [
+                "\u201cStudies show that 74% of buyers decide in the first 8 seconds.\u201d",
+                "\u201cThere\u2019s a specific kind of silence before a decision. You\u2019re in it.\u201d",
+                "\u201cI was going to write about X but honestly, this feels more real.\u201d",
+                "\u201cKeep reading. This next part is the one that changes things.\u201d",
+                "\u201cAnyway \u2014 I found something. Thought you should see it.\u201d"
+            ]
+        },
+        {
+            text: "What does your email list usually feel like to you?",
+            options: [
+                "A database I want to understand better.",
+                "A room I\u2019m performing in.",
+                "Something I should write to more often but don\u2019t.",
+                "A group of people I need to hold onto.",
+                "A thing I set up and haven\u2019t fully figured out."
+            ]
+        },
+        {
+            text: "What\u2019s the last thing that made someone reply to one of your emails?",
+            options: [
+                "A specific insight or data point they found useful.",
+                "The way I phrased something \u2014 they said it hit differently.",
+                "Honestly, I\u2019m not sure. It wasn\u2019t what I expected.",
+                "A subject line or hook that got them in the door.",
+                "I haven\u2019t gotten many replies yet."
+            ]
+        },
+        {
+            text: "What would \u201csuccess\u201d in email marketing look like for you, honestly?",
+            options: [
+                "Understanding my audience well enough to predict what they\u2019ll buy.",
+                "Writing something that feels true and still converts.",
+                "Being consistent. Actually showing up for my list.",
+                "Building enough momentum that people stay engaged long-term.",
+                "Getting the whole system working so it runs without me."
+            ]
+        }
+    ];
+
+    let currentStep = 0;
+    let answers = [];
+    let userEmail = '';
+
+    // Check for email param — subscribers skip optin
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get('email');
+
+    if (emailParam) {
+        userEmail = emailParam;
+        showScreen('quiz-screen');
+        loadQuestion();
+    } else {
+        showScreen('email-screen');
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function startDiagnostic() {
+        const emailInput = document.getElementById('email');
+        if (emailInput.value && emailInput.value.includes('@')) {
+            userEmail = emailInput.value;
             showScreen('quiz-screen');
             loadQuestion();
+        }
+    }
+
+    function loadQuestion() {
+        const q = questions[currentStep];
+        document.getElementById('progress-text').innerText = `${currentStep + 1} / 5`;
+        document.getElementById('question-text').innerText = q.text;
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.innerHTML = `<div class="radio"></div><span>${opt}</span>`;
+            div.onclick = () => selectOption(i, div);
+            container.appendChild(div);
+        });
+        document.getElementById('next-btn').disabled = true;
+    }
+
+    function selectOption(index, el) {
+        answers[currentStep] = index;
+        document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('next-btn').disabled = false;
+    }
+
+    function nextQuestion() {
+        currentStep++;
+        if (currentStep < questions.length) {
+            loadQuestion();
         } else {
-            showScreen('email-screen');
+            submitDiagnostic();
         }
+    }
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function startDiagnostic() {
-            const emailInput = document.getElementById('email');
-            if (emailInput.value && emailInput.value.includes('@')) {
-                userEmail = emailInput.value;
-                showScreen('quiz-screen');
-                loadQuestion();
-            }
-        }
-
-        function loadQuestion() {
-            const q = questions[currentStep];
-            document.getElementById('progress-text').innerText = `${currentStep + 1} / 5`;
-            document.getElementById('question-text').innerText = q.text;
-            
-            const container = document.getElementById('options-container');
-            container.innerHTML = '';
-            
-            q.options.forEach((opt, i) => {
-                const div = document.createElement('div');
-                div.className = 'option';
-                div.innerHTML = `<div class="radio"></div><span>${opt}</span>`;
-                div.onclick = () => selectOption(i, div);
-                container.appendChild(div);
+    async function submitDiagnostic() {
+        showScreen('loading-screen');
+        const payload = {
+            email: userEmail,
+            q1: answers[0],
+            q2: answers[1],
+            q3: answers[2],
+            q4: answers[3],
+            q5: answers[4]
+        };
+        try {
+            const res = await fetch(AGENT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-            
-            document.getElementById('next-btn').disabled = true;
+            const data = await res.json();
+            document.getElementById('result-headline').innerText = data.resultHeadline || 'Analysis Complete';
+            document.getElementById('result-body').innerText = data.resultBody || 'Your diagnostic has been processed.';
+            showScreen('result-screen');
+        } catch (err) {
+            document.getElementById('result-headline').innerText = 'Pattern Recognized';
+            document.getElementById('result-body').innerText = 'The diagnostic has been captured. Your full segmentation report is being generated and will be sent to your email shortly.';
+            showScreen('result-screen');
         }
-
-        function selectOption(index, el) {
-            answers[currentStep] = questions[currentStep].options[index];
-            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-            el.classList.add('selected');
-            document.getElementById('next-btn').disabled = false;
-        }
-
-        function nextQuestion() {
-            currentStep++;
-            if (currentStep < questions.length) {
-                loadQuestion();
-            } else {
-                submitDiagnostic();
-            }
-        }
-
-        async function submitDiagnostic() {
-            showScreen('loading-screen');
-            
-            const payload = {
-                email: userEmail,
-                q1: answers[0],
-                q2: answers[1],
-                q3: answers[2],
-                q4: answers[3],
-                q5: answers[4]
-            };
-
-            try {
-                const res = await fetch(AGENT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await res.json();
-                
-                document.getElementById('result-headline').innerText = data.resultHeadline || "Analysis Complete";
-                document.getElementById('result-body').innerText = data.resultBody || "Your diagnostic has been processed.";
-                showScreen('result-screen');
-            } catch (err) {
-                document.getElementById('result-headline').innerText = "Pattern Recognized";
-                document.getElementById('result-body').innerText = "The diagnostic has been captured. Your full segmentation report is being generated and will be sent to your email shortly.";
-                showScreen('result-screen');
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
