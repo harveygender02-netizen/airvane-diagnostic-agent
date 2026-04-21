@@ -1,0 +1,19 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy diagnostic.html to Cloudflare Worker
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Cloudflare Workers Static Assets
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: dd4157861d38ed21d45c87951793be9f
+          command: deploy
