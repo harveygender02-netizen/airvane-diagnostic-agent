@@ -1,361 +1,697 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stop Restarting — The Diagnostic | Airvane Sys</title>
-    <style>
-        :root {
-            --color-bg: #f9f7f4;
-            --color-text: #1a1a1a;
-            --color-text-muted: #666;
-            --color-border: #ddd;
-            --color-accent: #1a1a1a;
-            --font-display: 'Georgia', serif;
-            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stop Restarting — The Diagnostic | Airvane Sys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-bg: #f2f0ea;
+  --color-surface: #f7f5f0;
+  --color-surface-2: #faf9f6;
+  --color-border: #ddd9d2;
+  --color-divider: #e5e2db;
+  --color-text: #1e1c17;
+  --color-text-muted: #6b6960;
+  --color-text-faint: #a8a69f;
+  --color-accent: #3d6b5e;
+  --color-accent-hover: #2d5045;
+  --color-accent-highlight: #d4e4e0;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.25rem);
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 
-        body {
-            font-family: var(--font-body);
-            background: var(--color-bg);
-            color: var(--color-text);
-            line-height: 1.6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 2rem;
-        }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+  min-height: 100dvh;
+  line-height: 1.65;
+}
 
-        .container {
-            width: 100%;
-            max-width: 640px;
-        }
+img { display: block; max-width: 100%; }
+button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+input { font: inherit; color: inherit; }
 
-        header { margin-bottom: 3rem; }
+/* NAV */
+nav {
+  padding: var(--space-6) var(--space-8);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-divider);
+}
 
-        h1 {
-            font-family: var(--font-display);
-            font-size: 2.25rem;
-            font-weight: normal;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.01em;
-        }
+.nav-brand {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  text-decoration: none;
+}
 
-        .subtitle {
-            color: var(--color-text-muted);
-            font-size: 1.125rem;
-        }
+.nav-tagline {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  letter-spacing: 0.04em;
+}
 
-        .progress {
-            font-size: 0.875rem;
-            color: #999;
-            margin-bottom: 2rem;
-            letter-spacing: 0.05em;
-        }
+/* PROGRESS BAR */
+.progress-bar-wrap {
+  background: var(--color-divider);
+  height: 2px;
+  width: 100%;
+}
 
-        .screen { display: none; }
-        .screen.active { display: block; }
+.progress-bar {
+  height: 2px;
+  background: var(--color-accent);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 0%;
+}
 
-        .question-text {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            font-weight: 500;
-        }
+/* MAIN LAYOUT */
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-6);
+}
 
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 2.5rem;
-        }
+/* INTRO SCREEN */
+.screen { display: none; }
+.screen.active { display: block; }
 
-        .option {
-            background: white;
-            border: 1px solid var(--color-border);
-            padding: 1.25rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+.intro-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-6);
+}
 
-        .option:hover { border-color: #999; }
+.intro-headline {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  margin-bottom: var(--space-6);
+}
 
-        .option.selected {
-            border-color: var(--color-accent);
-            background: #fafafa;
-        }
+.intro-headline em {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
 
-        .radio {
-            width: 18px;
-            height: 18px;
-            border: 1px solid #ccc;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
+.intro-body {
+  color: var(--color-text-muted);
+  line-height: 1.75;
+  margin-bottom: var(--space-8);
+}
 
-        .selected .radio { border-color: var(--color-accent); }
+.intro-body p + p {
+  margin-top: var(--space-4);
+}
 
-        .selected .radio::after {
-            content: '';
-            width: 10px;
-            height: 10px;
-            background: var(--color-accent);
-            border-radius: 50%;
-        }
+.divider {
+  width: 40px;
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-8) 0;
+}
 
-        .btn-primary {
-            background: var(--color-accent);
-            color: white;
-            border: none;
-            padding: 1rem 2.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: opacity 0.2s;
-        }
+/* EMAIL INPUT */
+.email-field-wrap {
+  margin-bottom: var(--space-4);
+}
 
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.field-label {
+  display: block;
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
 
-        #email-section { margin-top: 2rem; }
+.email-input {
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
 
-        .input-group { margin-bottom: 1.5rem; }
+.email-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 12%, transparent);
+}
 
-        label {
-            display: block;
-            font-size: 0.875rem;
-            color: var(--color-text-muted);
-            margin-bottom: 0.5rem;
-        }
+.email-input::placeholder { color: var(--color-text-faint); }
 
-        input[type="email"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            font-size: 1rem;
-        }
+.field-note {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  margin-top: var(--space-2);
+}
 
-        .result-card {
-            background: #fff;
-            border: 1px solid var(--color-border);
-            padding: 2rem;
-            border-radius: 4px;
-        }
+/* BUTTONS */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-8);
+  background: var(--color-accent);
+  color: #f7f5f0;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: background var(--transition), transform var(--transition);
+  width: 100%;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
 
-        .result-headline {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
+.btn-primary:hover { background: var(--color-accent-hover); }
+.btn-primary:active { transform: scale(0.99); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .result-body {
-            color: var(--color-text-muted);
-            margin-bottom: 1.5rem;
-        }
+.btn-ghost {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  padding: var(--space-2) 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.btn-ghost:hover { color: var(--color-text-muted); }
 
-        .loading {
-            text-align: center;
-            font-style: italic;
-            color: var(--color-text-muted);
-        }
-    </style>
+/* QUESTION SCREEN */
+.question-counter {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-6);
+}
+
+.question-text {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--color-text);
+  margin-bottom: var(--space-8);
+}
+
+/* ANSWER OPTIONS */
+.options-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.option-btn {
+  width: 100%;
+  text-align: left;
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+  cursor: pointer;
+}
+
+.option-btn:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.option-btn.selected {
+  background: var(--color-accent-highlight);
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.option-btn:active { transform: scale(0.995); }
+
+.nav-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-4);
+}
+
+.btn-back {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2) 0;
+}
+.btn-back:hover { color: var(--color-text-muted); }
+
+.btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-accent);
+  color: #f7f5f0;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: background var(--transition), opacity var(--transition);
+}
+.btn-next:hover { background: var(--color-accent-hover); }
+.btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* LOADING SCREEN */
+.loading-wrap {
+  text-align: center;
+  padding: var(--space-16) 0;
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.loading-text {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* RESULT SCREEN */
+.result-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-6);
+}
+
+.result-headline {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  margin-bottom: var(--space-5);
+}
+
+.result-body {
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-family: var(--font-display);
+  line-height: 1.5;
+  margin-bottom: var(--space-8);
+}
+
+.result-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.result-card-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.75;
+}
+
+.result-card-text strong {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.result-ps {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  line-height: 1.7;
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* ERROR STATE */
+.error-msg {
+  font-size: var(--text-xs);
+  color: #a12c2c;
+  margin-top: var(--space-2);
+  display: none;
+}
+.error-msg.visible { display: block; }
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+  nav { padding: var(--space-4) var(--space-5); }
+  main { padding: var(--space-8) var(--space-5); }
+  .option-btn { padding: var(--space-4) var(--space-5); }
+}
+</style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>Airvane Diagnostic</h1>
-        <p class="subtitle">Five questions. Honest answers only.</p>
-    </header>
 
-    <!-- EMAIL SCREEN (shown only when no ?email= param) -->
-    <div id="email-screen" class="screen">
-        <div id="email-section">
-            <div class="input-group">
-                <label for="email">Enter your email to start</label>
-                <input type="email" id="email" placeholder="you@example.com">
-            </div>
-            <button class="btn-primary" onclick="startDiagnostic()">Begin</button>
-        </div>
-    </div>
+<nav>
+  <a class="nav-brand" href="https://start.airvane.co">Airvane Sys.</a>
+  <span class="nav-tagline">Systems + Sanity for the Over-Informed</span>
+</nav>
 
-    <!-- QUIZ SCREEN -->
-    <div id="quiz-screen" class="screen">
-        <div class="progress" id="progress-text">1 / 5</div>
-        <div class="question-text" id="question-text"></div>
-        <div class="options" id="options-container"></div>
-        <button class="btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next</button>
-    </div>
-
-    <!-- LOADING SCREEN -->
-    <div id="loading-screen" class="screen">
-        <p class="loading">Analyzing the pattern...</p>
-    </div>
-
-    <!-- RESULT SCREEN -->
-    <div id="result-screen" class="screen">
-        <div class="result-card">
-            <div class="result-headline" id="result-headline"></div>
-            <div class="result-body" id="result-body"></div>
-            <p style="font-size:0.875rem;color:#999;">Check your email for the full segmentation breakdown.</p>
-        </div>
-    </div>
+<div class="progress-bar-wrap">
+  <div class="progress-bar" id="progressBar"></div>
 </div>
 
+<main>
+
+  <!-- SCREEN 0: INTRO -->
+  <div class="screen active" id="screen-intro">
+    <p class="intro-label">The Stop Restarting Diagnostic</p>
+    <h1 class="intro-headline">Five questions.<br><em>One pattern.</em><br>No new framework.</h1>
+    <div class="intro-body">
+      <p>You already know the loop exists. You've named it. You've read about it. You've built a Notion workspace to track it.</p>
+      <p>This diagnostic does one thing: it identifies the specific disguise your exit wears. Not the loop in general. Yours.</p>
+      <p>Five minutes. No score. No advice. Just precision.</p>
+    </div>
+    <div class="divider"></div>
+    <label class="field-label" for="emailInput">Your email address</label>
+    <div class="email-field-wrap">
+      <input
+        type="email"
+        id="emailInput"
+        class="email-input"
+        placeholder="you@gmail.com"
+        autocomplete="email"
+      >
+      <p class="field-note">Gmail or Yahoo preferred — deliverability. We'll explain on day one.</p>
+      <p class="error-msg" id="emailError">A valid email is required to continue.</p>
+    </div>
+    <button class="btn-primary" id="startBtn" onclick="startDiagnostic()">
+      Begin the Diagnostic →
+    </button>
+  </div>
+
+  <!-- SCREEN 1-5: QUESTIONS -->
+  <div class="screen" id="screen-questions">
+    <p class="question-counter" id="questionCounter">Question 1 of 5</p>
+    <p class="question-text" id="questionText"></p>
+    <ul class="options-list" id="optionsList"></ul>
+    <div class="nav-btns">
+      <button class="btn-back" id="backBtn" onclick="goBack()">← Back</button>
+      <button class="btn-next" id="nextBtn" onclick="goNext()" disabled>
+        Continue →
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN: LOADING -->
+  <div class="screen" id="screen-loading">
+    <div class="loading-wrap">
+      <div class="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="loading-text">Reading the pattern.</p>
+    </div>
+  </div>
+
+  <!-- SCREEN: RESULT -->
+  <div class="screen" id="screen-result">
+    <p class="result-label">Your Diagnostic Result</p>
+    <h2 class="result-headline" id="resultHeadline"></h2>
+    <p class="result-body" id="resultBody"></p>
+
+    <div class="result-card">
+      <p class="result-card-text">
+        <strong>What happens next:</strong> The first email in your sequence is on its way. It will name the exact moment the disguise fires — not in theory. In the specific hours where your pattern lives. Read it when it arrives. Do not archive it for later.
+      </p>
+    </div>
+
+    <p class="result-ps">
+      P.S. The diagnostic doesn't fix the loop. It shows you where to look when you're already inside it. That's a different thing. The email sequence explains the difference.
+    </p>
+  </div>
+
+</main>
+
+<footer>
+  © 2026 Airvane Sys — <a href="https://airvane.co" target="_blank" rel="noopener">airvane.co</a>
+</footer>
+
 <script>
-    const AGENT_URL = 'https://airvane-diagnostic-agent-production.up.https://airvane-diagnostic.harveygender8.workers.dev/webhook';
+const AGENT_ENDPOINT = "https://airvane-diagnostic.harveygender8.workers.dev/webhook";
 
-    const questions = [
-        {
-            text: "When you sit down to write an email, what usually happens first?",
-            options: [
-                "I research the topic or audience before writing anything.",
-                "I hear a voice or tone in my head and start from there.",
-                "I start writing but drift — the email becomes something else.",
-                "I struggle to hold attention, including my own.",
-                "I keep opening new tabs instead of writing."
-            ]
-        },
-        {
-            text: "Which sentence would you most likely write?",
-            options: [
-                "\u201cStudies show that 74% of buyers decide in the first 8 seconds.\u201d",
-                "\u201cThere\u2019s a specific kind of silence before a decision. You\u2019re in it.\u201d",
-                "\u201cI was going to write about X but honestly, this feels more real.\u201d",
-                "\u201cKeep reading. This next part is the one that changes things.\u201d",
-                "\u201cAnyway \u2014 I found something. Thought you should see it.\u201d"
-            ]
-        },
-        {
-            text: "What does your email list usually feel like to you?",
-            options: [
-                "A database I want to understand better.",
-                "A room I\u2019m performing in.",
-                "Something I should write to more often but don\u2019t.",
-                "A group of people I need to hold onto.",
-                "A thing I set up and haven\u2019t fully figured out."
-            ]
-        },
-        {
-            text: "What\u2019s the last thing that made someone reply to one of your emails?",
-            options: [
-                "A specific insight or data point they found useful.",
-                "The way I phrased something \u2014 they said it hit differently.",
-                "Honestly, I\u2019m not sure. It wasn\u2019t what I expected.",
-                "A subject line or hook that got them in the door.",
-                "I haven\u2019t gotten many replies yet."
-            ]
-        },
-        {
-            text: "What would \u201csuccess\u201d in email marketing look like for you, honestly?",
-            options: [
-                "Understanding my audience well enough to predict what they\u2019ll buy.",
-                "Writing something that feels true and still converts.",
-                "Being consistent. Actually showing up for my list.",
-                "Building enough momentum that people stay engaged long-term.",
-                "Getting the whole system working so it runs without me."
-            ]
-        }
-    ];
+const questions = [
+  {
+    text: "Before you fully registered that the energy had changed, something was already happening. What was it?",
+    options: [
+      "More information. Something still needed researching before the next step made sense.",
+      "More conditions. One external thing had to be in place first.",
+      "More certainty. The direction felt right — but not certain enough yet.",
+      "Nothing I could name. I was just suddenly less present than I'd been the day before."
+    ]
+  },
+  {
+    text: "As you were working on it, you already noticed something shift. Which sentence arrived first?",
+    options: [
+      "Someone else has already done this better.",
+      "One more thing needs to be right before this is ready.",
+      "The direction isn't wrong — it just needs adjusting.",
+      "I didn't hear a sentence. It was quieter than that."
+    ]
+  },
+  {
+    text: "When it ended, it didn't announce itself. Which of these is closest to what you felt?",
+    options: [
+      "Clarity. Something that had been slightly off finally had a name.",
+      "Relief. A quiet pressure lifted without me fully noticing it had been there.",
+      "Nothing at first. The realisation came later — usually a few days after.",
+      "I didn't feel it end. I just noticed at some point that I was somewhere else."
+    ]
+  },
+  {
+    text: "In the hours just before it went quiet, where was most of your attention?",
+    options: [
+      "On the edges. Naming things, formatting things, adjusting things that weren't the core.",
+      "On other people's work. Reading, watching, researching what was already out there.",
+      "On the same piece of work, repeatedly. Making it better before showing it to no one.",
+      "On something new. A different idea had opened a tab I told myself I was just looking at."
+    ]
+  },
+  {
+    text: "You already know what you're about to do next. Which part of that is true?",
+    options: [
+      "I'm going to try again. And somewhere around day two or three, I already know what happens.",
+      "I'm going to try again. And this time I want to see the moment it fires — before it's already done.",
+      "I'm going to try again. And I need something that works in that window, not before it or after.",
+      "I'm going to try again. I don't know if I believe it will be different. But I'm going to anyway."
+    ]
+  }
+];
 
-    let currentStep = 0;
-    let answers = [];
-    let userEmail = '';
+let currentQ = 0;
+let answers = [];
+let subscriberEmail = "";
 
-    // Check for email param — subscribers skip optin
-    const urlParams = new URLSearchParams(window.location.search);
-    const emailParam = urlParams.get('email');
+function setProgress(pct) {
+  document.getElementById("progressBar").style.width = pct + "%";
+}
 
-    if (emailParam) {
-        userEmail = emailParam;
-        showScreen('quiz-screen');
-        loadQuestion();
-    } else {
-        showScreen('email-screen');
-    }
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
+function startDiagnostic() {
+  const emailInput = document.getElementById("emailInput");
+  const emailError = document.getElementById("emailError");
+  const email = emailInput.value.trim();
+  const valid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
 
-    function startDiagnostic() {
-        const emailInput = document.getElementById('email');
-        if (emailInput.value && emailInput.value.includes('@')) {
-            userEmail = emailInput.value;
-            showScreen('quiz-screen');
-            loadQuestion();
-        }
-    }
+  if (!valid) {
+    emailError.classList.add("visible");
+    emailInput.focus();
+    return;
+  }
 
-    function loadQuestion() {
-        const q = questions[currentStep];
-        document.getElementById('progress-text').innerText = `${currentStep + 1} / 5`;
-        document.getElementById('question-text').innerText = q.text;
-        const container = document.getElementById('options-container');
-        container.innerHTML = '';
-        q.options.forEach((opt, i) => {
-            const div = document.createElement('div');
-            div.className = 'option';
-            div.innerHTML = `<div class="radio"></div><span>${opt}</span>`;
-            div.onclick = () => selectOption(i, div);
-            container.appendChild(div);
-        });
-        document.getElementById('next-btn').disabled = true;
-    }
+  emailError.classList.remove("visible");
+  subscriberEmail = email;
+  currentQ = 0;
+  answers = [];
+  renderQuestion();
+  showScreen("screen-questions");
+  setProgress(10);
+}
 
-    function selectOption(index, el) {
-        answers[currentStep] = index;
-        document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-        el.classList.add('selected');
-        document.getElementById('next-btn').disabled = false;
-    }
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById("questionCounter").textContent = `Question ${currentQ + 1} of ${questions.length}`;
+  document.getElementById("questionText").textContent = q.text;
 
-    function nextQuestion() {
-        currentStep++;
-        if (currentStep < questions.length) {
-            loadQuestion();
-        } else {
-            submitDiagnostic();
-        }
-    }
+  const list = document.getElementById("optionsList");
+  list.innerHTML = "";
 
-    async function submitDiagnostic() {
-        showScreen('loading-screen');
-        const payload = {
-            email: userEmail,
-            q1: answers[0],
-            q2: answers[1],
-            q3: answers[2],
-            q4: answers[3],
-            q5: answers[4]
-        };
-        try {
-            const res = await fetch(AGENT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            document.getElementById('result-headline').innerText = data.resultHeadline || 'Analysis Complete';
-            document.getElementById('result-body').innerText = data.resultBody || 'Your diagnostic has been processed.';
-            showScreen('result-screen');
-        } catch (err) {
-            document.getElementById('result-headline').innerText = 'Pattern Recognized';
-            document.getElementById('result-body').innerText = 'The diagnostic has been captured. Your full segmentation report is being generated and will be sent to your email shortly.';
-            showScreen('result-screen');
-        }
-    }
+  q.options.forEach((opt, i) => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    if (answers[currentQ] === i) btn.classList.add("selected");
+    btn.textContent = opt;
+    btn.onclick = () => selectOption(i);
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+
+  document.getElementById("nextBtn").disabled = answers[currentQ] === undefined;
+  document.getElementById("backBtn").style.visibility = currentQ === 0 ? "hidden" : "visible";
+}
+
+function selectOption(index) {
+  answers[currentQ] = index;
+  document.querySelectorAll(".option-btn").forEach((btn, i) => {
+    btn.classList.toggle("selected", i === index);
+  });
+  document.getElementById("nextBtn").disabled = false;
+}
+
+function goNext() {
+  if (answers[currentQ] === undefined) return;
+
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+    setProgress(10 + (currentQ / questions.length) * 80);
+  } else {
+    submitDiagnostic();
+  }
+}
+
+function goBack() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+    setProgress(10 + (currentQ / questions.length) * 80);
+  }
+}
+
+async function submitDiagnostic() {
+  showScreen("screen-loading");
+  setProgress(95);
+
+  const payload = {
+    email: subscriberEmail,
+    q1: answers[0],
+    q2: answers[1],
+    q3: answers[2],
+    q4: answers[3],
+    q5: answers[4]
+  };
+
+  try {
+    const res = await fetch(AGENT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error("Agent returned non-200");
+
+    const data = await res.json();
+    showResult(data.resultHeadline, data.resultBody);
+
+  } catch (err) {
+    // Fallback result if agent is unreachable
+    showResult(
+      "Your loop has a shape.",
+      "The email sequence will name it precisely. It is on its way."
+    );
+  }
+
+  setProgress(100);
+}
+
+function showResult(headline, body) {
+  document.getElementById("resultHeadline").textContent = headline;
+  document.getElementById("resultBody").textContent = body;
+  showScreen("screen-result");
+}
+
+// Init
+setProgress(0);
 </script>
 </body>
 </html>
