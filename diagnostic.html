@@ -11,109 +11,203 @@
     :root {
       --color-bg: #f2f0ea;
       --color-surface: #f7f5f0;
-      --color-surface-2: #faf9f6;
       --color-border: #ddd9d2;
-      --color-divider: #e5e2db;
       --color-text: #1e1c17;
       --color-text-muted: #6b6960;
-      --color-text-faint: #a8a69f;
       --color-accent: #3d6b5e;
-      --color-accent-hover: #2d5045;
-      --color-accent-highlight: #d4e4e0;
       --font-display: 'Playfair Display', Georgia, serif;
       --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
-      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
-      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
-      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.25rem);
-      --space-2: 0.5rem;
-      --space-3: 0.75rem;
-      --space-4: 1rem;
-      --space-5: 1.25rem;
-      --space-6: 1.5rem;
-      --space-8: 2rem;
-      --radius-md: 0.5rem;
-      --radius-lg: 0.75rem;
-      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); line-height: 1.6; }
-    nav { padding: var(--space-6); border-bottom: 1px solid var(--color-divider); text-align: center; }
-    .nav-brand { font-family: var(--font-display); font-size: var(--text-base); text-decoration: none; color: inherit; }
-    .progress-bar-wrap { background: var(--color-divider); height: 2px; }
-    .progress-bar { height: 2px; background: var(--color-accent); width: 0%; transition: width 0.4s; }
-    main { max-width: 600px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    nav {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      font-family: var(--font-display);
+      font-size: 1.125rem;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 500;
+    }
+    .nav-tagline {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+    main { flex: 1; max-width: 600px; margin: 0 auto; padding: 4rem 2rem; }
     .screen { display: none; }
     .screen.active { display: block; }
-    .intro-headline { font-family: var(--font-display); font-size: var(--text-2xl); margin-bottom: var(--space-6); }
-    .email-input { width: 100%; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: var(--space-4); }
-    .btn-primary { width: 100%; padding: var(--space-4); background: var(--color-accent); color: white; border-radius: var(--radius-md); cursor: pointer; border: none; font-weight: 500; }
-    .options-list { list-style: none; padding: 0; margin: var(--space-6) 0; display: flex; flex-direction: column; gap: var(--space-3); }
-    .option-btn { width: 100%; text-align: left; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); cursor: pointer; }
-    .option-btn.selected { background: var(--color-accent-highlight); border-color: var(--color-accent); }
-    .nav-btns { display: flex; justify-content: space-between; align-items: center; }
-    .btn-back { cursor: pointer; text-decoration: underline; color: var(--color-text-faint); }
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 1.2rem + 2.5vw, 3.25rem);
+      margin-bottom: 2rem;
+      line-height: 1.2;
+    }
+    p { margin-bottom: 1.5rem; color: var(--color-text-muted); }
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .helper-text {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+    .email-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 1rem;
+      background: var(--color-accent);
+      color: white;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      border: none;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .options-list {
+      list-style: none;
+      padding: 0;
+      margin: 2rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .option-btn:hover { background: #ebe9e4; }
+    .option-btn.selected {
+      background: #d4e4e0;
+      border-color: var(--color-accent);
+    }
+    .nav-btns {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+    }
+    .btn-back {
+      cursor: pointer;
+      text-decoration: underline;
+      color: var(--color-text-muted);
+      background: none;
+      border: none;
+      font-size: 0.875rem;
+    }
+    footer {
+      padding: 2rem;
+      border-top: 1px solid var(--color-border);
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+    footer a { color: inherit; }
   </style>
 </head>
 <body>
-  <nav><a href="/" class="nav-brand">Airvane Sys</a></nav>
-  <div class="progress-bar-wrap"><div id="progressBar" class="progress-bar"></div></div>
+  <nav>
+    <a href="https://start.airvane.co" class="nav-brand">Airvane Sys</a>
+    <span class="nav-tagline">Systems + Sanity for the Over-Informed</span>
+  </nav>
+
   <main>
     <div id="screen-intro" class="screen active">
-      <h1 class="intro-headline">The Stop Restarting Diagnostic</h1>
-      <div id="optInContainer">
-        <p style="margin-bottom:1rem">Enter your email to begin the diagnostic.</p>
-        <input type="email" id="emailInput" class="email-input" placeholder="you@email.com">
-      </div>
+      <h1>The Stop Restarting Diagnostic</h1>
+      <p>Five questions.<br>One pattern.<br>No new framework.</p>
+      <p>You already know the loop exists. You've named it. You've read about it. You've built a Notion workspace to track it.</p>
+      <p>This diagnostic does one thing: it identifies the specific disguise your exit wears. Not the loop in general. Yours.</p>
+      <p>Five minutes. No score. No advice. Just precision.</p>
+      
+      <label for="emailInput">Your email address</label>
+      <input type="email" id="emailInput" class="email-input" placeholder="you@email.com">
+      <p class="helper-text">Gmail or Yahoo preferred — deliverability. We'll explain on day one.</p>
+      
       <button class="btn-primary" onclick="startDiagnostic()">Begin the Diagnostic →</button>
     </div>
+
     <div id="screen-questions" class="screen">
-      <div id="questionCounter" style="font-size:var(--text-xs); color:var(--color-text-faint); margin-bottom:1rem"></div>
-      <div id="questionText" class="intro-headline" style="font-size:var(--text-xl)"></div>
+      <div id="questionCounter" style="font-size:0.875rem; color:var(--color-text-muted); margin-bottom:1rem"></div>
+      <h2 id="questionText" style="font-family:var(--font-display); font-size:1.75rem; margin-bottom:1.5rem"></h2>
       <ul id="optionsList" class="options-list"></ul>
       <div class="nav-btns">
         <button id="backBtn" class="btn-back" onclick="goBack()">← Back</button>
-        <button id="nextBtn" class="btn-primary" style="width:auto" onclick="goNext()">Continue →</button>
+        <button id="nextBtn" class="btn-primary" style="width:auto; padding:0.75rem 2rem" onclick="goNext()">Continue →</button>
       </div>
     </div>
+
     <div id="screen-loading" class="screen">
       <p>Reading the pattern...</p>
     </div>
+
     <div id="screen-result" class="screen">
-      <h2 id="resultHeadline" class="intro-headline"></h2>
-      <p id="resultBody" style="font-style:italic; color:var(--color-text-muted)"></p>
+      <h2 id="resultHeadline" style="font-family:var(--font-display); font-size:2.5rem; margin-bottom:1.5rem"></h2>
+      <p id="resultBody" style="font-style:italic; color:var(--color-text-muted); font-size:1.125rem; line-height:1.7"></p>
     </div>
   </main>
+
+  <footer>
+    © 2026 Airvane Sys — <a href="https://airvane.co">airvane.co</a>
+  </footer>
+
   <script>
     const AGENT_ENDPOINT = "https://airvane-diagnostic.harveygender8.workers.dev/webhook";
+    
     const questions = [
-      { text: "Before you fully registered that the energy had changed, something was already happening. What was it?", options: ["More information needed researching.", "External conditions needed to be in place.", "The direction felt right but not certain.", "I was just suddenly less present."] },
-      { text: "As you were working on it, which sentence arrived first?", options: ["Someone else has already done this better.", "One more thing needs to be right.", "The direction isn't wrong, just needs adjusting.", "It was quieter than that."] },
-      { text: "When it ended, which of these was closest to what you felt?", options: ["Clarity.", "Relief.", "Nothing at first.", "I just noticed I was somewhere else."] },
-      { text: "Where was most of your attention just before it went quiet?", options: ["On the edges (formatting, etc).", "On other people's work.", "On the same piece of work repeatedly.", "On something new."] },
-      { text: "What do you know about what happens next?", options: ["I know exactly what happens on day two.", "I want to see the moment it fires.", "I need something that works in that window.", "I don't know if it will be different."] }
+      { text: "Before you fully registered that the energy had changed, something was already happening. What was it?", options: ["More information needed researching.", "External conditions needed to be in place.", "The direction felt right but not certain.", "I was just suddenly less present.", "I opened a new tab."] },
+      { text: "As you were working on it, which sentence arrived first?", options: ["Someone else has already done this better.", "One more thing needs to be right.", "The direction isn't wrong, just needs adjusting.", "It was quieter than that.", "I wonder if there's a better framework."] },
+      { text: "When it ended, which of these was closest to what you felt?", options: ["Clarity.", "Relief.", "Nothing at first.", "I just noticed I was somewhere else.", "I had a better idea."] },
+      { text: "Where was most of your attention just before it went quiet?", options: ["On the edges (formatting, design, structure).", "On other people's work.", "On the same piece of work repeatedly.", "On something new.", "On whether this was the right approach."] },
+      { text: "What do you know about what happens next?", options: ["I know exactly what happens on day two.", "I want to see the moment it fires.", "I need something that works in that window.", "I don't know if it will be different.", "I have a new system to try."] }
     ];
+
     let currentQ = 0, answers = [], subscriberEmail = "";
-    (function init() {
-      const params = new URLSearchParams(window.location.search);
-      const emailParam = params.get("email");
-      if (emailParam) {
-        subscriberEmail = emailParam;
-        document.getElementById("optInContainer").style.display = "none";
-      }
-    })();
-    function setProgress(pct) { document.getElementById("progressBar").style.width = pct + "%"; }
-    function showScreen(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id)); }
+
     function startDiagnostic() {
-      if (!subscriberEmail) {
-        const email = document.getElementById("emailInput").value.trim();
-        if (!email.includes("@")) return alert("Valid email required");
-        subscriberEmail = email;
-      }
-      currentQ = 0; answers = []; renderQuestion(); showScreen("screen-questions"); setProgress(10);
+      const email = document.getElementById("emailInput").value.trim();
+      if (!email.includes("@")) return alert("Valid email required");
+      subscriberEmail = email;
+      currentQ = 0;
+      answers = [];
+      renderQuestion();
+      showScreen("screen-questions");
     }
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+    }
+
     function renderQuestion() {
       const q = questions[currentQ];
       document.getElementById("questionCounter").textContent = `Question ${currentQ + 1} of ${questions.length}`;
@@ -129,26 +223,36 @@
           document.querySelectorAll(".option-btn").forEach((b, idx) => b.classList.toggle("selected", idx === i));
           document.getElementById("nextBtn").disabled = false;
         };
-        const li = document.createElement("li"); li.appendChild(btn); list.appendChild(li);
+        const li = document.createElement("li");
+        li.appendChild(btn);
+        list.appendChild(li);
       });
       document.getElementById("nextBtn").disabled = answers[currentQ] === undefined;
       document.getElementById("backBtn").style.visibility = currentQ === 0 ? "hidden" : "visible";
     }
+
     function goNext() {
       if (currentQ < questions.length - 1) {
-        currentQ++; renderQuestion(); setProgress(10 + (currentQ / questions.length) * 80);
-      } else { submitDiagnostic(); }
-    }
-    function goBack() {
-      if (currentQ > 0) {
-        currentQ--; renderQuestion(); setProgress(10 + (currentQ / questions.length) * 80);
+        currentQ++;
+        renderQuestion();
+      } else {
+        submitDiagnostic();
       }
     }
+
+    function goBack() {
+      if (currentQ > 0) {
+        currentQ--;
+        renderQuestion();
+      }
+    }
+
     async function submitDiagnostic() {
-      showScreen("screen-loading"); setProgress(95);
+      showScreen("screen-loading");
       try {
         const res = await fetch(AGENT_ENDPOINT, {
-          method: "POST", headers: { "Content-Type": "application/json" },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: subscriberEmail, q1: answers[0], q2: answers[1], q3: answers[2], q4: answers[3], q5: answers[4] })
         });
         const data = await res.json();
@@ -160,7 +264,6 @@
         document.getElementById("resultBody").textContent = "The email sequence will name it precisely.";
         showScreen("screen-result");
       }
-      setProgress(100);
     }
   </script>
 </body>
