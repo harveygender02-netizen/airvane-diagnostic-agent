@@ -1,13 +1,7 @@
-const express = require('express');
-const axios = require('axios');
-require('dotenv').config();
+// Cloudflare Worker - Native fetch API (no Express/axios/dotenv)
 
-const app = express();
-app.use(express.json());
+const KIT_API_KEY_DEFAULT = 'h-rN1A2tqzq2zgTOD7J7HQ';
 
-const KIT_API_KEY = process.env.KIT_API_KEY || 'h-rN1A2tqzq2zgTOD7J7HQ';
-
-// Scoring map: answer index (0=a, 1=b, 2=c, 3=d, 4=e) -> segment
 const scoring = {
   q1: { 0: 'research', 1: 'strategy-voice', 2: 'drift', 3: 'attention', 4: 'new-tab' },
   q2: { 0: 'research', 1: 'strategy-voice', 2: 'drift', 3: 'attention', 4: 'new-tab' },
@@ -53,57 +47,83 @@ function calculateSegment(answers) {
   return Object.entries(tally).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-async function tagSubscriberInKit(email, segment) {
+async function tagSubscriberInKit(email, segment, apiKey) {
   try {
-    // Add/update subscriber in Kit with segment tag
     const tagName = `airvane-diagnostic-${segment}`;
-    // First find or create the tag
-    const tagsRes = await axios.get('https://api.convertkit.com/v3/tags', {
-      params: { api_key: KIT_API_KEY }
-    });
-    let tag = tagsRes.data.tags.find(t => t.name === tagName);
+    const tagsRes = await fetch(`https://api.convertkit.com/v3/tags?api_key=${apiKey}`);
+    const tagsData = await tagsRes.json();
+    let tag = tagsData.tags.find(t => t.name === tagName);
     if (!tag) {
-      const createTag = await axios.post('https://api.convertkit.com/v3/tags', {
-        api_key: KIT_API_KEY,
-        tag: { name: tagName }
+      const createRes = await fetch('https://api.convertkit.com/v3/tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: apiKey, tag: { name: tagName } })
       });
-      tag = createTag.data.tag;
+      const createData = await createRes.json();
+      tag = createData.tag;
     }
-    // Tag the subscriber
-    await axios.post(`https://api.convertkit.com/v3/tags/${tag.id}/subscribe`, {
-      api_key: KIT_API_KEY,
-      email: email
+    await fetch(`https://api.convertkit.com/v3/tags/${tag.id}/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: apiKey, email })
     });
-    console.log(`Tagged ${email} as ${tagName}`);
   } catch (err) {
     console.error('Kit tagging error:', err.message);
   }
 }
 
-app.post('/webhook', async (req, res) => {
-  try {
-    const { email, q1, q2, q3, q4, q5 } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email required' });
+function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  };
+}
 
-    const answers = { q1, q2, q3, q4, q5 };
-    const segment = calculateSegment(answers);
-    const result = resultMap[segment];
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const KIT_API_KEY = env.KIT_API_KEY || KIT_API_KEY_DEFAULT;
 
-    // Tag in Kit asynchronously (don't block response)
-    tagSubscriberInKit(email, segment);
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders() });
+    }
 
-    res.json({
-      segment,
-      resultHeadline: result.resultHeadline,
-      resultBody: result.resultBody
-    });
-  } catch (err) {
-    console.error('Webhook error:', err);
-    res.status(500).json({ error: 'Internal error' });
+    if (url.pathname === '/health' && request.method === 'GET') {
+      return new Response(JSON.stringify({ status: 'ok' }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() }
+      });
+    }
+
+    if (url.pathname === '/webhook' && request.method === 'POST') {
+      try {
+        const body = await request.json();
+        const { email, q1, q2, q3, q4, q5 } = body;
+        if (!email) {
+          return new Response(JSON.stringify({ error: 'Email required' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders() }
+          });
+        }
+        const answers = { q1, q2, q3, q4, q5 };
+        const segment = calculateSegment(answers);
+        const result = resultMap[segment];
+        tagSubscriberInKit(email, segment, KIT_API_KEY);
+        return new Response(JSON.stringify({
+          segment,
+          resultHeadline: result.resultHeadline,
+          resultBody: result.resultBody
+        }), {
+          headers: { 'Content-Type': 'application/json', ...corsHeaders() }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: 'Internal error' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders() }
+        });
+      }
+    }
+
+    return new Response('Not found', { status: 404, headers: corsHeaders() });
   }
-});
-
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Airvane agent running on port ${PORT}`));
+};
