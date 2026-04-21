@@ -2,7 +2,4 @@ name = "airvane-diagnostic"
 main = "index.js"
 compatibility_date = "2024-01-01"
 account_id = "dd4157861d38ed21d45c87951793be9f"
-
-[assets]
-directory = "."
-binding = "ASSETS"
+compatibility_flags = ["nodejs_compat"]
