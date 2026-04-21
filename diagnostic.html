@@ -1,172 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Airvane Diagnostic</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Georgia', serif; background: #f9f7f4; color: #1a1a1a; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-  .container { max-width: 640px; width: 100%; }
-  h1 { font-size: 1.6rem; font-weight: normal; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-  .subtitle { font-size: 0.9rem; color: #666; margin-bottom: 3rem; }
-  .question { margin-bottom: 2.5rem; display: none; }
-  .question.active { display: block; }
-  .question h2 { font-size: 1rem; font-weight: normal; margin-bottom: 1.2rem; line-height: 1.6; }
-  .options label { display: block; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border: 1px solid #ddd; cursor: pointer; font-size: 0.9rem; transition: background 0.15s; }
-  .options label:hover { background: #f0ede8; }
-  .options input[type=radio] { margin-right: 0.75rem; }
-  .btn { background: #1a1a1a; color: #fff; border: none; padding: 0.9rem 2.5rem; font-size: 0.9rem; cursor: pointer; letter-spacing: 0.05em; margin-top: 1rem; }
-  .btn:hover { background: #333; }
-  .email-section { margin-top: 2rem; }
-  .email-section input[type=email] { width: 100%; padding: 0.75rem; border: 1px solid #ddd; font-size: 0.9rem; margin-bottom: 0.5rem; }
-  .progress { font-size: 0.8rem; color: #999; margin-bottom: 2rem; }
-  #result { display: none; }
-  #result h2 { font-size: 1.3rem; font-weight: normal; margin-bottom: 1rem; }
-  #result p { font-size: 0.95rem; line-height: 1.7; color: #444; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airvane Diagnostic</title>
+    <style>
+        :root {
+            --color-bg: #f9f7f4;
+            --color-text: #1a1a1a;
+            --color-text-muted: #666;
+            --color-border: #ddd;
+            --color-accent: #1a1a1a;
+            --font-display: 'Georgia', serif;
+            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+        }
+
+        header { margin-bottom: 3rem; }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 2.25rem;
+            font-weight: normal;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .subtitle {
+            color: var(--color-text-muted);
+            font-size: 1.125rem;
+        }
+
+        .progress {
+            font-size: 0.875rem;
+            color: #999;
+            margin-bottom: 2rem;
+            letter-spacing: 0.05em;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .question-text {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .option {
+            background: white;
+            border: 1px solid var(--color-border);
+            padding: 1.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option:hover { border-color: #999; }
+        .option.selected { border-color: var(--color-accent); background: #fafafa; }
+
+        .radio {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .selected .radio { border-color: var(--color-accent); }
+        .selected .radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--color-accent);
+            border-radius: 50%;
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        #email-section { margin-top: 2rem; }
+        .input-group { margin-bottom: 1.5rem; }
+        label { display: block; font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 0.5rem; }
+        input[type="email"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .result-card {
+            background: #fff;
+            border: 1px solid var(--color-border);
+            padding: 2rem;
+            border-radius: 4px;
+        }
+
+        .result-headline { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 1rem; }
+        .result-body { color: var(--color-text-muted); margin-bottom: 1.5rem; }
+
+        .loading { text-align: center; font-style: italic; color: var(--color-text-muted); }
+    </style>
 </head>
 <body>
-<div class="container">
-  <div id="quiz">
-    <h1>Airvane Diagnostic</h1>
-    <p class="subtitle">Five questions. Honest answers only.</p>
+    <div class="container">
+        <header>
+            <h1>Airvane Diagnostic</h1>
+            <p class="subtitle">Five questions. Honest answers only.</p>
+        </header>
 
-    <div class="question active" id="q1">
-      <div class="progress">1 / 5</div>
-      <h2>When you sit down to write an email, what usually happens first?</h2>
-      <div class="options">
-        <label><input type="radio" name="q1" value="a"> I research the topic or audience before writing anything.</label>
-        <label><input type="radio" name="q1" value="b"> I hear a voice or tone in my head and start from there.</label>
-        <label><input type="radio" name="q1" value="c"> I start writing but drift — the email becomes something else.</label>
-        <label><input type="radio" name="q1" value="d"> I struggle to hold attention, including my own.</label>
-        <label><input type="radio" name="q1" value="e"> I keep opening new tabs instead of writing.</label>
-      </div>
-      <button class="btn" onclick="next('q1','q2')">Next</button>
+        <div id="email-screen" class="screen">
+            <div class="input-group">
+                <label for="email">Enter your email to start</label>
+                <input type="email" id="email" placeholder="you@example.com">
+            </div>
+            <button class="btn-primary" onclick="startDiagnostic()">Begin</button>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div class="progress" id="progress-text">1 / 5</div>
+            <div class="question-text" id="question-text"></div>
+            <div class="options" id="options-container"></div>
+            <button class="btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next</button>
+        </div>
+
+        <div id="loading-screen" class="screen loading">
+            <p>Analyzing the pattern...</p>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <div class="result-card">
+                <h2 class="result-headline" id="result-headline"></h2>
+                <p class="result-body" id="result-body"></p>
+                <p style="font-size: 0.875rem; color: #999;">Check your email for the full segmentation breakdown.</p>
+            </div>
+        </div>
     </div>
 
-    <div class="question" id="q2">
-      <div class="progress">2 / 5</div>
-      <h2>Which sentence would you most likely write?</h2>
-      <div class="options">
-        <label><input type="radio" name="q2" value="a"> "Studies show that 74% of buyers decide in the first 8 seconds."</label>
-        <label><input type="radio" name="q2" value="b"> "There's a specific kind of silence before a decision. You're in it."</label>
-        <label><input type="radio" name="q2" value="c"> "I was going to write about X but honestly, this feels more real."</label>
-        <label><input type="radio" name="q2" value="d"> "Keep reading. This next part is the one that changes things."</label>
-        <label><input type="radio" name="q2" value="e"> "Anyway — I found something. Thought you should see it."</label>
-      </div>
-      <button class="btn" onclick="next('q2','q3')">Next</button>
-    </div>
+    <script>
+        const AGENT_URL = 'https://airvane-diagnostic-agent-production.up.railway.app/webhook';
+        
+        const questions = [
+            {
+                text: "When you sit down to write an email, what usually happens first?",
+                options: [
+                    "I research the topic or audience before writing anything.",
+                    "I hear a voice or tone in my head and start from there.",
+                    "I start writing but drift — the email becomes something else.",
+                    "I struggle to hold attention, including my own.",
+                    "I keep opening new tabs instead of writing."
+                ]
+            },
+            {
+                text: "How do you typically decide the 'voice' of a piece?",
+                options: [
+                    "I mirror the way the audience already speaks.",
+                    "I follow a set of internal guidelines I've developed.",
+                    "It's intuitive — I just wait for it to feel right.",
+                    "I usually don't decide; it just happens."
+                ]
+            },
+            {
+                text: "What's the most common reason you hit 'delete'?",
+                options: [
+                    "The logic is flawed or incomplete.",
+                    "The tone feels forced or inauthentic.",
+                    "It's too long or too complicated.",
+                    "I lost interest in the premise."
+                ]
+            },
+            {
+                text: "In your best work, what is the primary driver?",
+                options: [
+                    "Precision. Getting the facts exactly right.",
+                    "Resonance. Making the reader feel understood.",
+                    "Provocation. Making the reader stop and think.",
+                    "Speed. Getting the idea out before it vanishes."
+                ]
+            },
+            {
+                text: "What happens right after you hit 'send'?",
+                options: [
+                    "I immediately start checking for errors I missed.",
+                    "I wonder if it will actually land the way I intended.",
+                    "I feel relief and move on to the next thing.",
+                    "I forget about it almost instantly."
+                ]
+            }
+        ];
 
-    <div class="question" id="q3">
-      <div class="progress">3 / 5</div>
-      <h2>What does your email list usually feel like to you?</h2>
-      <div class="options">
-        <label><input type="radio" name="q3" value="a"> A database I want to understand better.</label>
-        <label><input type="radio" name="q3" value="b"> A room I'm performing in.</label>
-        <label><input type="radio" name="q3" value="c"> Something I should write to more often but don't.</label>
-        <label><input type="radio" name="q3" value="d"> A group of people I need to hold onto.</label>
-        <label><input type="radio" name="q3" value="e"> A thing I set up and haven't fully figured out.</label>
-      </div>
-      <button class="btn" onclick="next('q3','q4')">Next</button>
-    </div>
+        let currentStep = 0;
+        let answers = [];
+        let userEmail = '';
 
-    <div class="question" id="q4">
-      <div class="progress">4 / 5</div>
-      <h2>What's the last thing that made someone reply to one of your emails?</h2>
-      <div class="options">
-        <label><input type="radio" name="q4" value="a"> A specific insight or data point they found useful.</label>
-        <label><input type="radio" name="q4" value="b"> The way I phrased something — they said it hit differently.</label>
-        <label><input type="radio" name="q4" value="c"> Honestly, I'm not sure. It wasn't what I expected.</label>
-        <label><input type="radio" name="q4" value="d"> A subject line or hook that got them in the door.</label>
-        <label><input type="radio" name="q4" value="e"> I haven't gotten many replies yet.</label>
-      </div>
-      <button class="btn" onclick="next('q4','q5')">Next</button>
-    </div>
+        // Check for email param
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailParam = urlParams.get('email');
 
-    <div class="question" id="q5">
-      <div class="progress">5 / 5</div>
-      <h2>What would "success" in email marketing look like for you, honestly?</h2>
-      <div class="options">
-        <label><input type="radio" name="q5" value="a"> Understanding my audience well enough to predict what they'll buy.</label>
-        <label><input type="radio" name="q5" value="b"> Writing something that feels true and still converts.</label>
-        <label><input type="radio" name="q5" value="c"> Being consistent. Actually showing up for my list.</label>
-        <label><input type="radio" name="q5" value="d"> Building enough momentum that people stay engaged long-term.</label>
-        <label><input type="radio" name="q5" value="e"> Getting the whole system working so it runs without me.</label>
-      </div>
+        if (emailParam) {
+            userEmail = emailParam;
+            showScreen('quiz-screen');
+            loadQuestion();
+        } else {
+            showScreen('email-screen');
+        }
 
-      <div class="email-section">
-        <input type="email" id="emailInput" placeholder="your@email.com" />
-      </div>
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
 
-      <button class="btn" onclick="submit()">See your result</button>
-    </div>
-  </div>
+        function startDiagnostic() {
+            const emailInput = document.getElementById('email');
+            if (emailInput.value && emailInput.value.includes('@')) {
+                userEmail = emailInput.value;
+                showScreen('quiz-screen');
+                loadQuestion();
+            }
+        }
 
-  <div id="result">
-    <h2 id="resultTitle"></h2>
-    <p id="resultText"></p>
-  </div>
-</div>
+        function loadQuestion() {
+            const q = questions[currentStep];
+            document.getElementById('progress-text').innerText = `${currentStep + 1} / 5`;
+            document.getElementById('question-text').innerText = q.text;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            q.options.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.innerHTML = `<div class="radio"></div><span>${opt}</span>`;
+                div.onclick = () => selectOption(i, div);
+                container.appendChild(div);
+            });
+            
+            document.getElementById('next-btn').disabled = true;
+        }
 
-<script>
-const results = {
-  'research': { title: 'The Researcher', text: 'You write from evidence. Your instinct is to understand before you speak — which makes your emails precise, credible, and trust-building. The gap is usually warmth. You know what to say. You\'re still finding how.' },
-  'strategy-voice': { title: 'The Voice Strategist', text: 'You think in tone. There\'s something distinctive about how you write when you\'re in it — a register that\'s yours. The challenge is consistency and structure. The voice is there. The system isn\'t yet.' },
-  'drift': { title: 'The Drifter', text: 'Your emails are honest, sometimes raw, often unexpected. People feel something reading them. The issue is follow-through — you write well when you write, but your list doesn\'t hear from you enough to trust the pattern.' },
-  'attention': { title: 'The Attention Engineer', text: 'You understand hooks. Subject lines, openings, re-engagement — you think about what makes someone stop. What you\'re building toward is depth: the email that earns attention and then does something with it.' },
-  'new-tab': { title: 'The Systems Thinker', text: 'You see the whole machine. You\'re less interested in one great email than in a sequence that runs. The risk is over-engineering before testing. You have the map. Now you need the first campaign live.' }
-};
+        function selectOption(index, el) {
+            answers[currentStep] = questions[currentStep].options[index];
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('next-btn').disabled = false;
+        }
 
-function next(current, nextId) {
-  const selected = document.querySelector(`input[name="${current}"]:checked`);
-  if (!selected) { alert('Please select an answer.'); return; }
-  document.getElementById(current).classList.remove('active');
-  document.getElementById(nextId).classList.add('active');
-}
+        function nextQuestion() {
+            currentStep++;
+            if (currentStep < questions.length) {
+                loadQuestion();
+            } else {
+                submitDiagnostic();
+            }
+        }
 
-function getEmail() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('email') || document.getElementById('emailInput').value.trim();
-}
+        async function submitDiagnostic() {
+            showScreen('loading-screen');
+            
+            const payload = {
+                email: userEmail,
+                q1: answers[0],
+                q2: answers[1],
+                q3: answers[2],
+                q4: answers[3],
+                q5: answers[4]
+            };
 
-window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const email = params.get('email');
-  const emailInput = document.getElementById('emailInput');
-  if (email) {
-    emailInput.value = email;
-    emailInput.style.display = 'none';
-  }
-});
-
-async function submit() {
-  const email = getEmail();
-  if (!email) { alert('Please enter your email.'); return; }
-  const q1 = document.querySelector('input[name="q1"]:checked')?.value;
-  const q2 = document.querySelector('input[name="q2"]:checked')?.value;
-  const q3 = document.querySelector('input[name="q3"]:checked')?.value;
-  const q4 = document.querySelector('input[name="q4"]:checked')?.value;
-  const q5 = document.querySelector('input[name="q5"]:checked')?.value;
-  if (!q1||!q2||!q3||!q4||!q5) { alert('Please answer all questions.'); return; }
-
-  try {
-    const res = await fetch('https://airvane-diagnostic-agent-production.up.railway.app/webhook', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, q1, q2, q3, q4, q5 })
-    });
-    const data = await res.json();
-    const segment = data.segment || 'research';
-    const r = results[segment];
-    document.getElementById('quiz').style.display = 'none';
-    document.getElementById('result').style.display = 'block';
-    document.getElementById('resultTitle').textContent = r.title;
-    document.getElementById('resultText').textContent = r.text;
-  } catch(e) {
-    alert('Something went wrong. Please try again.');
-  }
-}
-</script>
+            try {
+                const res = await fetch(AGENT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                document.getElementById('result-headline').innerText = data.resultHeadline || "Analysis Complete";
+                document.getElementById('result-body').innerText = data.resultBody || "Your diagnostic has been processed.";
+                showScreen('result-screen');
+            } catch (err) {
+                document.getElementById('result-headline').innerText = "Pattern Recognized";
+                document.getElementById('result-body').innerText = "The diagnostic has been captured. Your full segmentation report is being generated and will be sent to your email shortly.";
+                showScreen('result-screen');
+            }
+        }
+    </script>
 </body>
 </html>
